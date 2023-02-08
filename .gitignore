@@ -1,2 +1,2 @@
-datas/kic/*
-preprocessed_datas/*
+datas/kic/*.xml
+preprocessed_datas/*.html
