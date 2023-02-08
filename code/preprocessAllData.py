@@ -9,7 +9,10 @@ errorCount = 0
 errorList = []
 for fileName in fileList:
     try:
-        XMLToHTML.preprocessXML(fileName)
+        try:
+            XMLToHTML.preprocessXML(fileName, 'euc-kr')
+        except:
+            XMLToHTML.preprocessXML(fileName, 'utf-8')
     except KeyboardInterrupt:
         sys.exit()
     except:
