@@ -15,7 +15,7 @@ table, th, td {
 def preprocessXML(XMLFileName):
     XMLFilePath = "../datas/kic/" + XMLFileName
 
-    with open(XMLFilePath, 'r') as f:
+    with open(XMLFilePath, 'r', encoding='euc-kr') as f:
         XMLData = f.read()
         XMLData = XMLData.split('\n', maxsplit=1)[1] # Trimming <?xml version="1.0" encoding="utf-8"?>
         XMLData = XMLData.replace('&cr;', '<br />') # Replacing unvalid carriage returns with valid ones
