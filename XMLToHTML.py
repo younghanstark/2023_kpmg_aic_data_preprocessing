@@ -1,32 +1,21 @@
 import toHTML
+import re
 
-baseHTML = """<!DOCTYPE html>
-<head>
-<title>report</title>
-<style>
-table, th, td {
-    border: 1px solid;
-}
-</style>
-</head>
-<body>
-"""
+datePattern = re.compile(r'AUNIT="PERIOD[^"]+" AUNITVALUE="([0-9]+)"')
 
-def preprocessXML(XMLFileName, reqEncoding):
+def XMLToHTML(XMLFileName, reqEncoding):
     XMLFilePath = "../datas/kic/" + XMLFileName
 
+    dateDict = dict()
     with open(XMLFilePath, 'r', encoding=reqEncoding) as f:
         XMLData = f.read()
         XMLData = XMLData.split('\n', maxsplit=1)[1] # Trimming <?xml version="1.0" encoding="utf-8"?>
         XMLData = XMLData.replace('&cr;', '<br />') # Replacing unvalid carriage returns with valid ones
-
-    HTMLFilePath = "../preprocessed_datas/" + XMLFileName.replace('.xml', '.html')
-    with open(HTMLFilePath, 'w') as f:
-        f.write(baseHTML)
-        html, title, companyName = toHTML.convert(XMLData)
-        print(title, companyName)
-        f.write(html)
-        f.write('</body>')
+        dates = re.findall(datePattern, XMLData)
+        dateDict['start'] = dates[0]
+        dateDict['end'] = dates[1]
+    
+    return dict(toHTML.convert(XMLData), **dateDict)
 
 if __name__ == "__main__":
     import sys
@@ -34,4 +23,9 @@ if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Insufficient arguments")
         sys.exit()
-    preprocessXML(argFileName)
+    with open("../" + argFileName.replace('.xml', '.html'), 'w') as f:
+        try:
+            resDict = XMLToHTML(argFileName, 'euc-kr')
+        except:
+            resDict = XMLToHTML(argFileName, 'utf-8')
+        f.write(resDict['html'])

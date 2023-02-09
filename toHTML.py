@@ -2,22 +2,25 @@ import XMLParse
 import re
 
 testStr = """
-<TD WIDTH="150" HEIGHT="30" VALIGN="MIDDLE" ALIGN="CENTER" USERMARK=" BC0XD7D7D7 B">제44기</TD>
+<a></a>
+<asdf><dd>사    업     보    고    서</dd></asdf>
+<TITLE ATOC="Y">I. 나는 열심히 합니다</TITLE>
 """
 
 attrPattern = re.compile(r' ([^=]+)=("[^"]+")')
+rddSpace = re.compile(r' {2,}')
 
 def convert(string):
-    title = ""
-    companyName = ""
+    resDict = dict()
+    resDict['title'] = "NULL"
+    resDict['companyName'] = "NULL"
+    
     def matchToHTML(match):
         tag = match.group(1)
         rawAttr = match.group(2)
         innerText = match.group(3)
 
-        if tag in ('COLGROUP', 'COL'): return ""
-
-        if tag in ('TABLE', 'THEAD', 'TR', 'TH', 'TBODY', 'TD', 'TE', 'TU'):
+        if tag in ('COLGROUP', 'COL', 'TABLE', 'THEAD', 'TR', 'TH', 'TBODY', 'TD', 'TE', 'TU'):
             if tag in ('TU', 'TE'): # Converting invalid XML tag into valid HTML tag
                 tag = 'TD'
             convertedAttr = ""
@@ -34,14 +37,17 @@ def convert(string):
         
         if innerText == "": return ""
 
-        if tag == "DOCUMENT-NAME":
-            tag = 'h1'
-            nonlocal title
-            title = innerText
+        # Parse XML content
+        if tag == "BODY":
+            tag = 'div class="container"'
+        elif tag == "DOCUMENT-NAME":
+            tag = 'div class="documentName"'
+            resDict['title'] = innerText
         elif tag == "COMPANY-NAME":
-            tag = 'h2'
-            nonlocal companyName
-            companyName = innerText
+            tag = 'div class="companyName"'
+            resDict['companyName'] = innerText
+        elif tag == 'COVER' or tag == 'SECTION-1':
+            tag = 'div class="splitPoint"'
         else: tag = 'div'
 
         return "<{}>{}</{}>\n".format(tag, stringToHTML(innerText), tag)
@@ -51,8 +57,11 @@ def convert(string):
         for match in XMLParse.XMLIter(string):
             # print(match.group(0))
             res += matchToHTML(match)
-        if res == "": return string
+        if res == "":
+            return re.sub(rddSpace, '', string) # Remove redundant spaces
         return res
-    return (stringToHTML(string), title, companyName)
+    
+    resDict['html'] = stringToHTML(string)
+    return resDict
 
-# print(stringToHTML(testStr))
+# print(convert(testStr))
