@@ -23,7 +23,9 @@ def preprocessXML(XMLFileName, reqEncoding):
     HTMLFilePath = "../preprocessed_datas/" + XMLFileName.replace('.xml', '.html')
     with open(HTMLFilePath, 'w') as f:
         f.write(baseHTML)
-        f.write(toHTML.stringToHTML(XMLData))
+        html, title, companyName = toHTML.convert(XMLData)
+        print(title, companyName)
+        f.write(html)
         f.write('</body>')
 
 if __name__ == "__main__":
